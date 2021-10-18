@@ -7,6 +7,8 @@ use serde::{Deserialize, Serialize};
 
 use Value::*;
 
+use crate::query::Query;
+
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum Value {
     Text(String),
@@ -68,6 +70,7 @@ impl Graph {
             None
         }
     }
+
     pub fn unlink(&mut self, from: &str, to: &str) -> Option<bool> {
         if self.nodes.contains_key(from) && self.nodes.contains_key(to) {
             Some(self.links.remove(&(String::from(from), String::from(to))))
@@ -75,10 +78,24 @@ impl Graph {
             None
         }
     }
+
     pub fn get(&self, key: &str) -> Option<Value> {
         match self.nodes.get(key) {
             Some(result) => Some(result.clone()),
             None => None
+        }
+    }
+
+    pub fn query(&self, query: Query) -> Option<bool> {
+        match query {
+            Query::TwoNodes(n0, n1) => {
+                if self.nodes.contains_key(&n0) && self.nodes.contains_key(&n1) {
+                    Some(self.links.contains(&(n0, n1)))
+                } else {
+                    None
+                }
+            },
+            _ => None,
         }
     }
 }
