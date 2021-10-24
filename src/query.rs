@@ -1,3 +1,7 @@
+#[derive(Debug)]
 pub enum Query {
-    TwoNodes(String, String),
+    LinkFromTo(String, String),
+    Node(String),
+    LinkFrom(String),
+    LinkTo(String),
 }
