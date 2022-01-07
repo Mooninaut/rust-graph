@@ -61,8 +61,8 @@ impl<NodeId: NodeKey> Graph<NodeId> {
             link_index: LinkIndex::new(),
         }
     }
-    pub fn insert<S, T>(&mut self, name: S, value: T) -> bool
-            where S: Into<NodeId>, T: Into<Value> {
+    pub fn insert<T>(&mut self, name: NodeId, value: T) -> bool
+            where T: Into<Value> {
         let name: NodeId = name.into();
 
         if self.nodes.contains_key(&name) {
@@ -73,30 +73,30 @@ impl<NodeId: NodeKey> Graph<NodeId> {
 
         return true;
     }
-    pub fn delete(&mut self, name: &NodeId) -> bool {
-        if !self.nodes.contains_key(name) {
+
+    pub fn delete(&mut self, node_id: &NodeId) -> bool {
+
+        if !self.nodes.contains_key(node_id) {
             return false;
         }
 
-        if let Ok(nodes) = self.list_query(Query::link_from(name)) {
+        if let Ok(nodes) = self.set_query(&Query::link_from(node_id)) {
             for node in nodes {
-                println!("{:?} from {:?}", node, name);
-                self.remove_from_link_index(&node, LinkDirection::To, name);
-                //self.remove_from_link_index(name, LinkDirection::From, &node);
-                self.link_index.remove(&(LinkDirection::From, name.clone()));
-                self.links.remove(&(name.clone(), node));
+                //println!("{:?} from {:?}", node, &node_id);
+                self.remove_from_link_index(&node, LinkDirection::To, node_id);
+                self.link_index.remove(&(LinkDirection::From, node_id.clone()));
+                self.links.remove(&(node_id.clone(), node));
             }
         }
-        if let Ok(nodes) = self.list_query(Query::link_to(name)) {
+        if let Ok(nodes) = self.set_query(&Query::link_to(node_id)) {
             for node in nodes {
-                println!("{:?} to {:?}", node, name);
-                //self.remove_from_link_index(name, LinkDirection::To, &node);
-                self.remove_from_link_index(&node, LinkDirection::From, name);
-                self.link_index.remove(&(LinkDirection::To, name.clone()));
-                self.links.remove(&(node, name.clone()));
+                //println!("{:?} to {:?}", node, &node_id);
+                self.remove_from_link_index(&node, LinkDirection::From, node_id);
+                self.link_index.remove(&(LinkDirection::To, node_id.clone()));
+                self.links.remove(&(node, node_id.clone()));
             }
         }
-        self.nodes.remove(name);
+        self.nodes.remove(node_id);
         return true;
     }
 
@@ -133,7 +133,6 @@ impl<NodeId: NodeKey> Graph<NodeId> {
             }
         }
     }
-
 
     // Returns true if the value was added, false if it was not because it was already present,
     // and None if the strings are not valid node IDs
@@ -178,25 +177,25 @@ impl<NodeId: NodeKey> Graph<NodeId> {
         }
     }
 
-    pub fn existence_query(&self, query: Query<NodeId>) -> Option<bool> {
+    pub fn existence_query(&self, query: &Query<NodeId>) -> Option<bool> {
         match query {
-            Query::LinkFromTo(n0, n1) => {
+            &Query::LinkFromTo(n0, n1) => {
                 if self.nodes.contains_key(&n0) && self.nodes.contains_key(&n1) {
-                    Some(self.links.contains(&(n0, n1)))
+                    Some(self.links.contains(&(n0.clone(), n1.clone())))
                 } else {
                     None
                 }
             },
-            Query::LinkFrom(node) => {
+            &Query::LinkFrom(node) => {
                 if self.nodes.contains_key(&node) {
-                    Some(self.link_index.contains_key(&(LinkDirection::From, node)))
+                    Some(self.link_index.contains_key(&(LinkDirection::From, node.clone())))
                 } else {
                     None
                 }
             },
-            Query::LinkTo(node) => {
+            &Query::LinkTo(node) => {
                 if self.nodes.contains_key(&node) {
-                    Some(self.link_index.contains_key(&(LinkDirection::To, node)))
+                    Some(self.link_index.contains_key(&(LinkDirection::To, node.clone())))
                 } else {
                     None
                 }
@@ -205,11 +204,11 @@ impl<NodeId: NodeKey> Graph<NodeId> {
         }
     }
 
-    pub fn list_query(&self, query: Query<NodeId>) -> Result<HashSet<NodeId>, String> {
+    pub fn set_query(&self, query: &Query<NodeId>) -> Result<HashSet<NodeId>, String> {
         match query {
-            Query::LinkFrom(node) => {
-                if self.nodes.contains_key(&node) {
-                    if let Some(set) = self.link_index.get(&(LinkDirection::From, node)) {
+            &Query::LinkFrom(node) => {
+                if self.nodes.contains_key(node) {
+                    if let Some(set) = self.link_index.get(&(LinkDirection::From, node.clone())) {
                         Ok(set.clone())
                     } else {
                         Ok(HashSet::new())
@@ -218,9 +217,9 @@ impl<NodeId: NodeKey> Graph<NodeId> {
                     Err(format!("Node '{:?}' does not exist", node))
                 }
             },
-            Query::LinkTo(node) => {
-                if self.nodes.contains_key(&node) {
-                    if let Some(set) = self.link_index.get(&(LinkDirection::To, node)) {
+            &Query::LinkTo(node) => {
+                if self.nodes.contains_key(node) {
+                    if let Some(set) = self.link_index.get(&(LinkDirection::To, node.clone())) {
                         Ok(set.clone())
                     } else {
                         Ok(HashSet::new())
