@@ -10,6 +10,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::value::Value::{self, *};
 use crate::query::Query;
+use crate::query::GraphQuery;
 
 #[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum LinkDirection {
@@ -177,6 +178,18 @@ impl<NodeId: NodeKey> Graph<NodeId> {
         }
     }
 
+    pub fn query_link_from<'a>(&'a self, from_id: &'a NodeId) -> GraphQuery<'a, NodeId> {
+        GraphQuery::new(self, Query::link_from(from_id))
+    }
+
+    pub fn query_link_to<'a>(&'a self, to_id: &'a NodeId) -> GraphQuery<'a, NodeId> {
+        GraphQuery::new(self, Query::link_to(to_id))
+    }
+
+    pub fn query_node<'a>(&'a self, node_id: &'a NodeId) -> GraphQuery<'a, NodeId> {
+        GraphQuery::new(self, Query::node(node_id))
+    }
+
     pub fn existence_query(&self, query: &Query<NodeId>) -> Option<bool> {
         match query {
             &Query::LinkFromTo(n0, n1) => {
@@ -200,6 +213,7 @@ impl<NodeId: NodeKey> Graph<NodeId> {
                     None
                 }
             },
+            &Query::Node(node) => Some(self.nodes.contains_key(&node)),
             _ => None,
         }
     }

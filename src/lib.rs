@@ -48,24 +48,35 @@ mod tests {
     }
 
     #[test]
+    fn should_query_nodes() {
+        let graph = get_graph();
+
+        assert_eq!(Some(true), graph.query_node(&banana()).exists());
+        assert_eq!(Some(true), graph.query_node(&cheese()).exists());
+        assert_eq!(Some(true), graph.query_node(&danish()).exists());
+        assert_eq!(Some(false), graph.query_node(&potato()).exists());
+    }
+
+    #[test]
     fn should_exist_query_link_from_to() {
         let graph = get_graph();
 
         let cheese = cheese();
         let danish = danish();
 
-        assert_eq!(Some(true) , graph.existence_query(&Query::link_from_to(&cheese, &danish)));
-        assert_eq!(Some(false), graph.existence_query(&Query::link_from_to(&danish, &cheese)));
-        assert_eq!(None       , graph.existence_query(&Query::link_from_to(&cheese, &potato())));
+        assert_eq!(Some(true) , graph.query_link_from(&cheese).to(&danish).exists());
+        assert_eq!(Some(true) , graph.query_link_to(&danish).from(&cheese).exists());
+        assert_eq!(Some(false), graph.query_link_from(&danish).to(&cheese).exists());
+        assert_eq!(None       , graph.query_link_to(&potato()).from(&cheese).exists());
     }
 
     #[test]
     fn should_exist_query_link_from() {
         let graph = get_graph();
 
-        assert_eq!(Some(true ), graph.existence_query(&Query::link_from(&cheese())));
-        assert_eq!(Some(false), graph.existence_query(&Query::link_from(&danish())));
-        assert_eq!(None       , graph.existence_query(&Query::link_from(&potato())));
+        assert_eq!(Some(true ), graph.query_link_from(&cheese()).exists());
+        assert_eq!(Some(false), graph.query_link_from(&danish()).exists());
+        assert_eq!(None       , graph.query_link_from(&potato()).exists());
     }
 
     #[test]
@@ -83,11 +94,11 @@ mod tests {
         let graph = get_graph();
 
         assert_eq!(Ok(HashSet::from([danish()])),
-            graph.set_query(&Query::link_from(&cheese())));
+            graph.query_link_from(&cheese()).as_set());
         assert_eq!(Ok(HashSet::new()),
-            graph.set_query(&Query::link_from(&danish())));
+            graph.query_link_from(&danish()).as_set());
         assert_eq!(Err("Node '\"potato\"' does not exist".to_string()),
-            graph.set_query(&Query::link_from(&potato())));
+            graph.query_link_from(&potato()).as_set());
     }
 
     #[test]
