@@ -30,12 +30,12 @@
                 "args": [
                     "test",
                     "--no-run",
-                    "--bin=rust-graph",
+                    "--lib=rust-graph",
                     "--package=rust-graph"
                 ],
                 "filter": {
                     "name": "rust-graph",
-                    "kind": "bin"
+                    "kind": "lib"
                 }
             },
             "args": [],
