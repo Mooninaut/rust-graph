@@ -1,13 +1,13 @@
 A primitive sort of Graph Database in Rust, teaching myself Rust, graphs, and databases.
 
 # Phase 1
-* You can add nodes.
-* Nodes have a name (string) and data (various types).
-* You can link a node to another node once (no duplicate links).
-* Links carry no metadata other than existence.
-* Links are directional.
-* You can query whether a node exists.
-* You can query whether a link exists from node A to node B.
+* You can add nodes. (Done)
+* Nodes have a name (string) and data (various types). (Done)
+* You can link a node to another node once (no duplicate links). (Done)
+* Links carry no metadata other than existence. (Done)
+* Links are directional. (Done)
+* You can query whether a node exists. (Done)
+* You can query whether a link exists from node A to node B. (Done)
 * You can get a list of all nodes N where X -> N.
 * You can get a list of all nodes N where N -> X.
 
@@ -30,4 +30,4 @@ No effort is made to ensure that simultaneous queries and writes from multiple t
 * Schema validation and enforcement.
 * Referential integrity.
 * Transactions.
-* REST API.
+* GraphQL API.
