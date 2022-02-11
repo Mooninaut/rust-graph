@@ -5,10 +5,10 @@ use crate::graph::Graph;
 
 #[derive(Debug, Copy, Clone)]
 pub enum Query<'a, NodeId: NodeKey> {
-    LinkFromTo(&'a NodeId, &'a NodeId),
+    LinkSourceTarget(&'a NodeId, &'a NodeId),
     Node(&'a NodeId),
-    LinkFrom(&'a NodeId),
-    LinkTo(&'a NodeId),
+    LinkSource(&'a NodeId),
+    LinkTarget(&'a NodeId),
 }
 
 #[derive(Debug, Copy, Clone)]
@@ -18,17 +18,17 @@ pub struct GraphQuery<'a, NodeId: NodeKey> {
 }
 
 impl<'a, NodeId: NodeKey> Query<'a, NodeId> {
-    pub fn link_from_to(from: &'a NodeId, to: &'a NodeId) -> Query<'a, NodeId> {
-        Query::LinkFromTo(from, to)
+    pub fn link_source_target(source: &'a NodeId, target: &'a NodeId) -> Query<'a, NodeId> {
+        Query::LinkSourceTarget(source, target)
     }
     pub fn node(node: &NodeId) -> Query<NodeId> {
         Query::Node(node)
     }
-    pub fn link_from(from: &NodeId) -> Query<NodeId> {
-        Query::LinkFrom(from)
+    pub fn link_source(source: &NodeId) -> Query<NodeId> {
+        Query::LinkSource(source)
     }
-    pub fn link_to(to: &NodeId) -> Query<NodeId> {
-        Query::LinkTo(to)
+    pub fn link_target(target: &NodeId) -> Query<NodeId> {
+        Query::LinkTarget(target)
     }
 }
 
@@ -37,17 +37,17 @@ impl<'a, NodeId: NodeKey> GraphQuery<'a, NodeId> {
         GraphQuery { graph, query }
     }
 
-    pub fn from(&self, from: &'a NodeId) -> GraphQuery<'a, NodeId> {
+    pub fn source(&self, source: &'a NodeId) -> GraphQuery<'a, NodeId> {
         match self.query {
-            Query::LinkTo(to) => GraphQuery { graph: self.graph, query: Query::link_from_to(from, to) },
-            _ => panic!("can't do LinkFrom when self isn't LinkTo") // todo
+            Query::LinkTarget(target) => GraphQuery { graph: self.graph, query: Query::link_source_target(source, target) },
+            _ => panic!("can't do LinkSource when self isn't LinkTarget") // todo
         }
     }
 
-    pub fn to(&self, to: &'a NodeId) -> GraphQuery<'a, NodeId> {
+    pub fn target(&self, target: &'a NodeId) -> GraphQuery<'a, NodeId> {
         match self.query {
-            Query::LinkFrom(from) => GraphQuery { graph: self.graph, query: Query::link_from_to(from, to) },
-            _ => panic!("can't do LinkTo when self isn't LinkFrom") // todo
+            Query::LinkSource(source) => GraphQuery { graph: self.graph, query: Query::link_source_target(source, target) },
+            _ => panic!("can't do LinkTarget when self isn't LinkSource") // todo
         }
     }
 
